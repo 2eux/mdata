@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #e9edf2;
+}
+
+.container {
+    width: 95%;
+    margin: 20px auto;
+}
+
+
+    .wrapper {
+        width: 95%;
+        margin: auto;
+    }
+
+    .box {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th {
+        background: var(--table-header);
+        padding: 8px;
+        border: 1px solid #ccc;
+    }
+
+    .table td {
+        padding: 8px;
+        border: 1px solid #ccc;
+    }
+
+    .validation-container {
+        display: flex;
+        gap: 15px;
+    }
+
+    .validation-box {
+        width: 50%;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .btn-area {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .btn-approve {
+        background: var(--btn-approve);
+        color: #fff;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 6px;
+    }
+
+    .btn-reject {
+        background: var(--btn-reject);
+        color: #fff;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 6px;
+    }
+
+    .btn-revision {
+        background: orange;
+        color: #fff;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 6px;
+    }
+
+    .duplicate-ok {
+        background: #d4edda;
+        padding: 10px;
+        border-radius: 6px;
+        color: green;
+    }
+
+    .duplicate-warning {
+        background: #ffeeba;
+        padding: 10px;
+        border-radius: 6px;
+        color: #856404;
+    }
+

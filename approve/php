@@ -1,0 +1,56 @@
+<?php
+session_start();
+include 'koneksi.php';
+
+if(!isset($_SESSION['user_id'])){
+    header("Location: login.php");
+    exit();
+}
+
+$request_id = $_GET['id'];
+$role = $_SESSION['role'];
+$user_id = $_SESSION['user_id'];
+
+// Urutan workflow sesuai role
+if($role == "MDM Business Unit"){
+    $next = "Direct Manager";
+}
+elseif($role == "Direct Manager"){
+    $next = "BPO Local";
+}
+elseif($role == "BPO Local"){
+    $next = "MDM Global";
+}
+elseif($role == "MDM Global"){
+    // Final approve
+    mysqli_query($koneksi, "
+        UPDATE request_header 
+        SET status='Approved', current_step='Completed'
+        WHERE id='$request_id'
+    ");
+
+    // Simpan history
+    mysqli_query($koneksi, "
+        INSERT INTO approval (request_id, approver_id, role, status)
+        VALUES ('$request_id', '$user_id', '$role', 'Approved')
+    ");
+
+    header("Location: approval.php");
+    exit();
+}
+
+// Kalau belum final, pindah ke step berikutnya
+mysqli_query($koneksi, "
+    UPDATE request_header 
+    SET current_step='$next'
+    WHERE id='$request_id'
+");
+
+// Simpan history approval
+mysqli_query($koneksi, "
+    INSERT INTO approval (request_id, approver_id, role, status)
+    VALUES ('$request_id', '$user_id', '$role', 'Approved')
+");
+
+header("Location: approval.php");
+?>
