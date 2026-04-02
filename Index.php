@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         body {
             height: 100vh;
-            background: url('Gambar/gambar1.png') no-repeat center center/cover;
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -58,14 +58,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: rgb(255, 250, 250);
         }
 
 .login-box {
     position: relative;
     width: 900px;
     padding: 30px;
-    background: rgba(255, 255, 255, 0.25); /* lebih transparan */
+    background: rgb(206, 206, 206); /* lebih transparan */
     backdrop-filter: blur(10px); /* efek blur kaca */
     -webkit-backdrop-filter: blur(10px); /* support Safari */
     border-radius: 12px;
@@ -98,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn {
             width: 100%;
             padding: 10px;
-            background: #138c74;
+            background: #676767ae;
             border: none;
             border-radius: 5px;
             color: white;
@@ -107,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .btn:hover {
-            background: #0d5143;
+            background: #2b2b2b;
         }
 
         .message {
@@ -122,6 +122,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="overlay"></div>
 
 <div class="login-box"> 
+
+    <h2 id="searchTitle">MDM REGIST</h2>
 
     <form method="POST">
         <div class="input-box">

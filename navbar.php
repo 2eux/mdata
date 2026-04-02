@@ -2,7 +2,9 @@
 if(session_status() == PHP_SESSION_NONE){
     session_start();
 }
-include 'koneksi.php';
+if(!isset($koneksi)){
+    include 'koneksi.php';
+}
 
 $user_id = $_SESSION['user_id'];
 
@@ -48,9 +50,26 @@ $userNav = mysqli_fetch_assoc($queryNav);
                 if($role == "Requestor"){
                     echo '<a href="request_list.php">History</a>';
                 }
-                if(in_array($role, ["MDM BU", "BPO Local", "MDM Business Unit", "Direct Manager", "MDM GLOBAL"])){
+                /*if(in_array($role, [ "BPO Local", "MDM Business Unit", "Direct Manager", "MDM GLOBAL"])){
+                    echo '<a href="approval_List.php">Review</a>';
+                }*/
+
+                if($role == "MDM Business Unit"){
                     echo '<a href="approval_List.php">Review</a>';
                 }
+
+                 if($role == "Direct Manager"){
+                    echo '<a href="APDM.php">Review</a>';
+                }
+
+                if($role == "BPO Local"){
+                    echo '<a href="APBPO.php">Review</a>';
+                }
+
+                if($role == "MDM Global"){
+                    echo '<a href="APGLOBAL.php">Review</a>';
+                }
+
                 ?>
                 <a href="profile.php">Profile</a>
                 <a href="logout.php">Log Out</a>

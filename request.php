@@ -71,13 +71,13 @@ $today = date("Y-m-d");
             background-position: right 10px center;
             transition: background-color 0.3s;
         ">
-            <option value="material">Material</option>
-            <option value="service">Service</option>
+            <option value="MATERIAL">Material</option>
+            <option value="SERVICE">Service</option>
         </select>
     </div>
 
     <form action="save_request.php" method="POST">
-    <input type="hidden" name="request_type" id="hiddenType" value="material">
+    <input type="hidden" name="request_type" id="hiddenType" value="MATERIAL">
 
     <!-- REQUESTOR INFORMATION -->
     <div class="card-req">
@@ -93,11 +93,11 @@ $today = date("Y-m-d");
             </div>
             <div class="form-group-req">
                 <label>Departemen</label>
-                <input type="text" name="departemen">
+                <input type="text" name="departemen" required>
             </div>
             <div class="form-group-req">
                 <label>Request Date</label>
-                <input type="date" name="tanggal" value="<?= $today; ?>" readonly>
+                <input type="date" name="request_date" value="<?= $today; ?>" readonly>
             </div>
         </div>
     </div>
@@ -127,8 +127,8 @@ $today = date("Y-m-d");
 
     <!-- BUTTON -->
     <div class="bottom-btn-req">
-        <button type="submit" name="action" value="draft" class="btn-draft-req">SAVE DRAFT</button>
-        <button type="submit" name="action" value="submit" class="btn-register-req">REGIST</button>
+        <button type="submit" name="action" value="DRAFT" class="btn-draft-req">SAVE DRAFT</button>
+        <button type="submit" name="action" value="SUBMIT" class="btn-register-req">REGIST</button>
     </div>
 
     </form>
@@ -136,17 +136,19 @@ $today = date("Y-m-d");
 
 <script>
 let no = 1;
-let currentType = 'material';
+let currentType = 'MATERIAL';
 
+// Kolom sesuai tabel request_detail_material & request_detail_service
 const columns = {
-    material: [
+    MATERIAL: [
         { label: 'Numbering Scheme',     name: 'numbering_scheme[]' },
-        { label: 'Material Number',      name: 'material_number[]' },
-        { label: 'Material Description', name: 'material_desc[]' },
+        { label: 'Material Number',     name: 'material_number[]' },   
+        { label: 'Material Description', name: 'description[]' },// sesuai kolom DB
+        { label: 'Description (Alt)',    name: 'description_alt[]' },
         { label: 'UOM',                  name: 'uom[]' },
-        { label: 'Ext. Material Group',  name: 'ext_group[]' },
+        { label: 'Ext. Material Group',  name: 'ext_material_group[]' },  // sesuai kolom DB
         { label: 'Material Group',       name: 'material_group[]' },
-        { label: 'Type',                 name: 'material_type[]' },
+        { label: 'Material Type',        name: 'material_type[]' },       // sesuai kolom DB
         { label: 'VHS',                  name: 'vhs[]' },
         { label: 'Location',             name: 'location[]' },
         { label: 'Val. Class',           name: 'val_class[]' },
@@ -156,24 +158,42 @@ const columns = {
         { label: 'Price Control',        name: 'price_control[]' },
         { label: 'Profile - Make',       name: 'profile_make[]' },
         { label: 'Profile - Plan',       name: 'profile_plan[]' },
+        { label: 'Old Material No.',     name: 'old_material_number[]' },
+        { label: 'EGI',                  name: 'egi[]' },
+        { label: 'CGI',                  name: 'cgi[]' },
+        { label: 'Engine Type',          name: 'engine_type[]' },
+        { label: 'Order Unit',           name: 'order_unit[]' },
+        { label: 'Net Weight',           name: 'net_weight[]' },
+        { label: 'Weight Unit',          name: 'weight_unit[]' },
+        { label: 'Max Stock Level',      name: 'max_stock_level[]' },
+        { label: 'Min Lot Size',         name: 'min_lot_size[]' },
+        { label: 'Max Lot Size',         name: 'max_lot_size[]' },
+        { label: 'Fix Lot Size',         name: 'fix_lot_size[]' },
+        { label: 'Standard Price',       name: 'standard_price[]' },
+        { label: 'Moving Price',         name: 'moving_price[]' },
+        { label: 'Remarks',              name: 'remarks[]' },
     ],
-    service: [
-        { label: 'Service Number',      name: 'service_number[]' },
-        { label: 'Service Description', name: 'service_desc[]' },
-        { label: 'UoM',                 name: 'uom[]' },
-        { label: 'Service Group',       name: 'service_group[]' },
-        { label: 'Service Category',    name: 'service_category[]' },
+    SERVICE: [
+        { label: 'Service Description',  name: 'description[]' },         // sesuai kolom DB
+        { label: 'UoM',                  name: 'uom[]' },
+        { label: 'Service Group',        name: 'service_group[]' },
+        { label: 'Service Category',     name: 'service_category[]' },
+        { label: 'Remarks',              name: 'remarks[]' },
     ]
 };
 
-const csvColIndex = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+// Index kolom CSV sesuai template material (mulai dari index 1, skip No.)
+const csvColIndex = {
+    MATERIAL: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+    SERVICE:  [1, 2, 3, 4, 5]
+};
 
 function updateSelectColor(type) {
     const select = document.getElementById('requestType');
     const style = getComputedStyle(document.documentElement);
-    if (type === 'material') {
+    if (type === 'MATERIAL') {
         select.style.backgroundColor = style.getPropertyValue('--logo-material').trim();
-    } else if (type === 'service') {
+    } else if (type === 'SERVICE') {
         select.style.backgroundColor = style.getPropertyValue('--logo-service').trim();
     }
 }
@@ -191,9 +211,9 @@ function changeType(type) {
     no = 1;
 
     document.getElementById('pageTitle').innerText =
-        type === 'material' ? 'MATERIAL REGISTRATION' : 'SERVICE REGISTRATION';
+        type === 'MATERIAL' ? 'MATERIAL REGISTRATION' : 'SERVICE REGISTRATION';
     document.getElementById('cardTitle').innerText =
-        type === 'material' ? 'DATA MATERIAL MASTER' : 'DATA SERVICE MASTER';
+        type === 'MATERIAL' ? 'DATA MATERIAL MASTER' : 'DATA SERVICE MASTER';
 
     renderHead();
     document.getElementById('tableBody').innerHTML = '';
@@ -244,7 +264,7 @@ function uploadCSV(input) {
         }
 
         if (dataStartIndex === -1) {
-            alert('Format CSV tidak sesuai template. Pastikan menggunakan template yang benar.');
+            alert('Format CSV tidak sesuai template.');
             return;
         }
 
@@ -259,7 +279,8 @@ function uploadCSV(input) {
             const cells = parseCSVLine(line);
             if (cells.length === 0) continue;
 
-            const values = csvColIndex.map(idx => (cells[idx] ?? '').trim());
+            const idxList = csvColIndex[currentType];
+            const values = idxList.map(idx => (cells[idx] ?? '').trim());
             const hasData = values.some(v => v !== '');
             if (!hasData) continue;
 
@@ -300,13 +321,28 @@ function parseCSVLine(line) {
 }
 
 function downloadTemplate() {
-    const headers = [
-        'No.', '*Numbering Scheme', '*Material Number', '*Material Description',
-        '*UOM', '*External Material Group', '*Material Group', '*Type',
-        '*VHS', '*Location', '*Val. Class', '*Val. Category',
-        '*Purchasing Group', '*MRP Controller', '*Price Control',
-        '*Profile - Make', '*Profile - Plan'
-    ];
+    let headers, filename;
+
+    if(currentType === 'MATERIAL'){
+        headers = [
+            'No.', '*Numbering Scheme', '*Material Description', 'Description Alt',
+            '*UOM', '*Ext. Material Group', '*Material Group', '*Material Type',
+            'VHS', 'Location', 'Val. Class', 'Val. Category',
+            'Purchasing Group', 'MRP Controller', 'Price Control',
+            'Profile - Make', 'Profile - Plan', 'Old Material No.',
+            'EGI', 'CGI', 'Engine Type', 'Order Unit',
+            'Net Weight', 'Weight Unit', 'Max Stock Level',
+            'Min Lot Size', 'Max Lot Size', 'Fix Lot Size',
+            'Standard Price', 'Moving Price', 'Remarks'
+        ];
+        filename = 'template_material.csv';
+    } else {
+        headers = [
+            'No.', '*Service Description', '*UoM',
+            '*Service Group', '*Service Category', 'Remarks'
+        ];
+        filename = 'template_service.csv';
+    }
 
     let csv = headers.join(',') + '\n';
     for (let i = 1; i <= 5; i++) {
@@ -317,7 +353,7 @@ function downloadTemplate() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'template_material.csv';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -325,7 +361,7 @@ function downloadTemplate() {
 window.onload = function() {
     renderHead();
     addRow();
-    updateSelectColor('material');
+    updateSelectColor('MATERIAL');
 }
 </script>
 

@@ -10,7 +10,6 @@ if(!isset($_SESSION['user_id'])){
 $company_id = $_SESSION['company_id'];
 $role       = $_SESSION['role'];
 
-// Ambil theme warna
 $queryTheme = mysqli_query($koneksi, "SELECT fungsi, warna FROM theme WHERE company_id='$company_id'");
 $theme = [];
 while($row = mysqli_fetch_assoc($queryTheme)){
@@ -20,33 +19,33 @@ while($row = mysqli_fetch_assoc($queryTheme)){
 // ================= SUMMARY =================
 
 $pending = mysqli_fetch_assoc(mysqli_query($koneksi, "
- SELECT COUNT(DISTINCT rh.id) as total
-FROM request_header rh
-LEFT JOIN approval a 
-    ON rh.id = a.request_id 
-    AND a.step = '$role'
-    AND a.detail_material_id IS NULL
-    AND a.detail_service_id IS NULL
-WHERE rh.current_step = '$role'
-AND (a.status IS NULL OR a.status = 'PARTIAL')
+    SELECT COUNT(*) as total 
+    FROM request_header
+    WHERE current_step = '$role' 
+    AND status IN ('PENDING', 'PARTIAL')
+    AND company_id = '$company_id'
 "))['total'];
 
 $approved = mysqli_fetch_assoc(mysqli_query($koneksi, "
-    SELECT COUNT(DISTINCT request_id) as total 
-    FROM approval
-    WHERE step   = '$role' 
-    AND status   = 'GENERAL_APPROVED'
-    AND detail_material_id IS NULL
-    AND detail_service_id  IS NULL
+    SELECT COUNT(DISTINCT a.request_id) as total 
+    FROM approval a
+    JOIN request_header rh ON a.request_id = rh.id
+    WHERE a.step             = '$role' 
+    AND a.status             = 'GENERAL_APPROVED'
+    AND a.detail_material_id IS NULL
+    AND a.detail_service_id  IS NULL
+    AND rh.company_id        = '$company_id'
 "))['total'];
 
 $rejected = mysqli_fetch_assoc(mysqli_query($koneksi, "
-    SELECT COUNT(DISTINCT request_id) as total 
-    FROM approval
-    WHERE step   = '$role' 
-    AND status   = 'REJECTED'
-    AND detail_material_id IS NULL
-    AND detail_service_id  IS NULL
+    SELECT COUNT(DISTINCT a.request_id) as total 
+    FROM approval a
+    JOIN request_header rh ON a.request_id = rh.id
+    WHERE a.step             = '$role' 
+    AND a.status             = 'REJECTED'
+    AND a.detail_material_id IS NULL
+    AND a.detail_service_id  IS NULL
+    AND rh.company_id        = '$company_id'
 "))['total'];
 
 
@@ -56,50 +55,31 @@ $query = mysqli_query($koneksi, "
         rh.*,
         u.nama,
         (
-            SELECT COUNT(*) 
-            FROM request_detail_material 
-            WHERE request_id = rh.id
+            SELECT COUNT(*) FROM request_detail_material 
+            WHERE request_id = rh.id AND is_forwarded = 1
         ) as total_material,
         (
-            SELECT COUNT(*) 
-            FROM request_detail_service 
-            WHERE request_id = rh.id
+            SELECT COUNT(*) FROM request_detail_service 
+            WHERE request_id = rh.id AND is_forwarded = 1
         ) as total_service,
-        (
-            SELECT COUNT(*) 
-            FROM request_detail_material 
-            WHERE request_id = rh.id AND status = 'APPROVED'
-        ) as total_approved_material,
-        (
-            SELECT COUNT(*) 
-            FROM request_detail_material 
-            WHERE request_id = rh.id AND status = 'REJECTED'
-        ) as total_rejected_material,
-        (
-            SELECT COUNT(*) 
-            FROM request_detail_service 
-            WHERE request_id = rh.id AND status = 'APPROVED'
-        ) as total_approved_service,
-        (
-            SELECT COUNT(*) 
-            FROM request_detail_service 
-            WHERE request_id = rh.id AND status = 'REJECTED'
-        ) as total_rejected_service,
         a.status as approval_status
     FROM request_header rh
     JOIN users u ON rh.requestor_id = u.id
     LEFT JOIN approval a 
-        ON rh.id = a.request_id 
-        AND a.step                = '$role'
-        AND a.detail_material_id  IS NULL
-        AND a.detail_service_id   IS NULL
-    WHERE rh.current_step = '$role'
-       OR (
-            a.step   = '$role' 
-            AND a.status IN ('GENERAL_APPROVED', 'REJECTED')
+        ON rh.id                 = a.request_id 
+        AND a.step               = '$role'
+        AND a.detail_material_id IS NULL
+        AND a.detail_service_id  IS NULL
+    WHERE rh.company_id = '$company_id'
+    AND (
+        rh.current_step = '$role'
+        OR (
+            a.step             = '$role' 
+            AND a.status       IN ('GENERAL_APPROVED', 'REJECTED')
             AND a.detail_material_id IS NULL
             AND a.detail_service_id  IS NULL
-          )
+        )
+    )
     GROUP BY rh.id
     ORDER BY rh.id DESC
 ");
@@ -108,7 +88,7 @@ $query = mysqli_query($koneksi, "
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Review Request</title>
+    <title>MDM Global Review Request</title>
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/approval.css">
     <style>
@@ -123,7 +103,6 @@ $query = mysqli_query($koneksi, "
     }
     </style>
 </head>
-
 <body>
 
 <?php include 'navbar.php'; ?>
@@ -154,7 +133,6 @@ $query = mysqli_query($koneksi, "
                     <th>Request Type</th>
                     <th>Requester</th>
                     <th>Total Item</th>
-                    <th>Approved / Rejected</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -176,52 +154,33 @@ $query = mysqli_query($koneksi, "
                         }
                         ?>
                     </td>
-                    <td style="text-align:center">
+                    <td><?= date('d M Y', strtotime($row['request_date'])) ?></td>
+                    <td>
                         <?php
-                        if($row['request_type'] == 'MATERIAL'){
-                            echo '<span style="color:green">✓ ' . $row['total_approved_material'] . '</span>';
-                            echo ' / ';
-                            echo '<span style="color:red">✗ ' . $row['total_rejected_material'] . '</span>';
+                        $approval_status = $row['approval_status'];
+                        $header_status   = $row['status'];
+
+                        if($approval_status == 'GENERAL_APPROVED'){
+                            echo '<span class="status-approved">General Approved</span>';
+                        } elseif($approval_status == 'REJECTED' || $header_status == 'REJECTED'){
+                            echo '<span class="status-reject">Rejected</span>';
+                        } elseif($header_status == 'COMPLETED'){
+                            echo '<span class="status-approved">Completed</span>';
+                        } elseif($header_status == 'PARTIAL'){
+                            echo '<span class="status-partial">Partial</span>';
                         } else {
-                            echo '<span style="color:green">✓ ' . $row['total_approved_service'] . '</span>';
-                            echo ' / ';
-                            echo '<span style="color:red">✗ ' . $row['total_rejected_service'] . '</span>';
+                            echo '<span class="status-pending">Pending</span>';
                         }
                         ?>
                     </td>
-                    <td><?= date('d M Y', strtotime($row['request_date'])) ?></td>
-                    
-<td>
-    <?php
-    // Gunakan approval_status untuk tampilan di list
-    $approval_status = $row['approval_status']; // status dari tabel approval
-    $header_status   = $row['status'];           // status dari request_header
-
-    if($approval_status == 'GENERAL_APPROVED'){
-        echo '<span class="status-approved">General Approved</span>';
-    }
-    elseif($approval_status == 'REJECTED' || $header_status == 'REJECTED'){
-        echo '<span class="status-reject">Rejected</span>';
-    }
-    elseif($header_status == 'COMPLETED'){
-        echo '<span class="status-approved">Completed</span>';
-    }
-    elseif($header_status == 'PARTIAL'){
-        echo '<span class="status-partial">Partial</span>';
-    }
-    else{
-        echo '<span class="status-pending">Pending</span>';
-    }
-    ?>
-</td>
                     <td>
-                        <a href="reviwMDMBU.php?id=<?= $row['id'] ?>" class="btn-review">Review</a>
+                        <a href="MDM_Global_Review.php?id=<?= $row['id'] ?>" class="btn-review">Review</a>
                     </td>
                 </tr>
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="8" style="text-align:center;padding:30px;color:#999">
+                    <td colspan="7" style="text-align:center;padding:30px;color:#999">
                         Tidak ada request untuk direview.
                     </td>
                 </tr>

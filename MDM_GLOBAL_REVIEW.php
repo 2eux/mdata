@@ -30,6 +30,7 @@ $queryHeader = mysqli_query($koneksi, "
     FROM request_header rh
     JOIN users u ON rh.requestor_id = u.id
     WHERE rh.id = $request_id
+    AND rh.company_id = '$company_id'
 ");
 $header = mysqli_fetch_assoc($queryHeader);
 
@@ -39,15 +40,11 @@ if(!$header){
 
 $request_type = $header['request_type'];
 
-// =====================================================
-// CEK SUDAH GENERAL APPROVE/REJECT DI STEP INI
-// Pakai tabel approval, bukan is_forwarded / header status
-// Karena setelah General Approve, status header pindah ke PENDING (step baru)
-// =====================================================
+// Cek sudah general approve/reject di step ini
 $cekSudahAksi = mysqli_fetch_assoc(mysqli_query($koneksi, "
     SELECT status FROM approval
     WHERE request_id = '$request_id'
-    AND step = 'MDM Business Unit'
+    AND step = 'MDM Global'
     AND status IN ('GENERAL_APPROVED', 'REJECTED')
     AND detail_material_id IS NULL
     AND detail_service_id IS NULL
@@ -56,20 +53,19 @@ $cekSudahAksi = mysqli_fetch_assoc(mysqli_query($koneksi, "
 $sudah_general = !empty($cekSudahAksi);
 $aksi_general  = $cekSudahAksi['status'] ?? '';
 
-// Detail sesuai request_type
+// Detail — hanya yang is_forwarded = 1 (lolos dari step sebelumnya)
 if($request_type == 'MATERIAL'){
     $queryDetail = mysqli_query($koneksi, "
         SELECT * FROM request_detail_material
-        WHERE request_id = $request_id
+        WHERE request_id = $request_id AND is_forwarded = 1
     ");
 } else {
     $queryDetail = mysqli_query($koneksi, "
         SELECT * FROM request_detail_service
-        WHERE request_id = $request_id
+        WHERE request_id = $request_id AND is_forwarded = 1
     ");
 }
 
-// Simpan semua rows ke array
 $rows = [];
 while($row = mysqli_fetch_assoc($queryDetail)){
     $rows[] = $row;
@@ -79,13 +75,13 @@ while($row = mysqli_fetch_assoc($queryDetail)){
 $total          = count($rows);
 $done           = array_filter($rows, fn($r) => in_array($r['status'], ['APPROVED','REJECTED']));
 $approved_items = array_filter($rows, fn($r) => $r['status'] == 'APPROVED');
-$all_reviewed   = count($done) == $total;
+$all_reviewed   = count($done) == $total && $total > 0;
 $has_approved   = count($approved_items) > 0;
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Review Request MDM BU</title>
+    <title>Review Request MDM Global</title>
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/reviewMDM.css">
     <style>
@@ -119,6 +115,9 @@ $has_approved   = count($approved_items) > 0;
     <!-- Detail Table -->
     <div class="box">
         <b><?= $request_type == 'MATERIAL' ? 'Material Information' : 'Service Information' ?></b>
+        <?php if($total == 0): ?>
+            <p style="color:#999;margin-top:10px">Tidak ada item yang diteruskan ke step ini.</p>
+        <?php else: ?>
         <table class="table">
             <thead>
                 <tr>
@@ -191,32 +190,12 @@ $has_approved   = count($approved_items) > 0;
             <?php endforeach; ?>
             </tbody>
         </table>
+        <?php endif; ?>
     </div>
 
-    <!-- Validation -->
+    <!-- Duplicate Check Only -->
     <div class="validation-container">
-        <div class="validation-box">
-            <b>MDM VALIDATION</b><br><br>
-            <?php if($request_type == 'MATERIAL'): ?>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Material number format is valid</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> No duplicate material number found</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Material description is clear and complete</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Unit of Measure (UoM) is appropriate</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Material group classification is correct</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Material type is valid</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> External material group is correct</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Old material number reference is valid</label><br>
-            <?php else: ?>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Service number format is valid</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> No duplicate service number found</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Service description is clear and complete</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Unit of Measure (UoM) is appropriate</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Service group classification is correct</label><br>
-                <label><input type="checkbox" class="mdm-check" onchange="cekChecklist()"> Service category is valid</label><br>
-            <?php endif; ?>
-        </div>
-
-        <div class="validation-box">
+        <div class="validation-box" style="width:100%">
             <b>Duplicate Check</b><br><br>
             <?php
             $duplicate_found = false;
@@ -266,10 +245,7 @@ $has_approved   = count($approved_items) > 0;
                 <?php if($all_reviewed && $has_approved): ?>
                     <button type="submit" name="action" value="general_approve"
                         id="btnGeneralApprove"
-                        class="btn-approve"
-                        disabled
-                        style="opacity:0.5"
-                        title="Centang semua checklist MDM Validation terlebih dahulu">
+                        class="btn-approve">
                         ✓ General Approve (<?= count($approved_items) ?> item lanjut)
                     </button>
                 <?php else: ?>
@@ -306,25 +282,10 @@ $has_approved   = count($approved_items) > 0;
     <?php endif; ?>
 
     <div style="text-align:right;margin-top:20px">
-        <a href="approval_list.php" class="btn-back">BACK</a>
+        <a href="APGLOBAL.php" class="btn-back">BACK</a>
     </div>
 
 </div>
-
-<script>
-function cekChecklist() {
-    const checks     = document.querySelectorAll('.mdm-check');
-    const btnApprove = document.getElementById('btnGeneralApprove');
-
-    if(!btnApprove) return;
-
-    const semuaChecked = Array.from(checks).every(c => c.checked);
-
-    btnApprove.disabled      = !semuaChecked;
-    btnApprove.style.opacity = semuaChecked ? '1' : '0.5';
-    btnApprove.title         = semuaChecked ? '' : 'Centang semua checklist MDM Validation terlebih dahulu';
-}
-</script>
 
 </body>
 </html>

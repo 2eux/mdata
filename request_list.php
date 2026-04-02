@@ -5,7 +5,7 @@ if(session_status() == PHP_SESSION_NONE){
 include 'koneksi.php';
 
 if(!isset($_SESSION['user_id'])){
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -19,8 +19,8 @@ while($row = mysqli_fetch_assoc($queryTheme)){
     $theme[$row['fungsi']] = $row['warna'];
 }
 
-// 2. Summary Counts
-$statuses = ['Draft', 'Pending', 'Approved', 'Rejected'];
+// 2. Summary Counts — sesuaikan status jadi uppercase
+$statuses = ['DRAFT', 'PENDING', 'PARTIAL', 'APPROVED', 'REJECTED'];  // tambah PARTIAL
 $summary = [];
 foreach ($statuses as $st) {
     $res = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM request_header WHERE requestor_id = $user_id AND status = '$st'");
@@ -28,14 +28,16 @@ foreach ($statuses as $st) {
     $summary[$st] = $data['total'];
 }
 
-// 3. Query List
+// 3. Query List — ganti request_detail jadi request_detail_material + request_detail_service
 $sql = "SELECT
             rh.id,
             rh.request_no,
+            rh.request_type,
             rh.request_date,
             rh.status,
             rh.current_step,
-            (SELECT COUNT(*) FROM request_detail rd WHERE rd.request_id = rh.id) as total_material
+            (SELECT COUNT(*) FROM request_detail_material rdm WHERE rdm.request_id = rh.id) as total_material,
+            (SELECT COUNT(*) FROM request_detail_service rds WHERE rds.request_id = rh.id) as total_service
         FROM request_header rh
         WHERE rh.requestor_id = $user_id
         ORDER BY rh.id DESC";
@@ -71,7 +73,7 @@ $query = mysqli_query($koneksi, $sql);
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2>My Request List</h2>
-        <a href="create_request.php" style="background: var(--btn-primary); color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">+ New Request</a>
+        <a href="request.php" style="background: var(--btn-primary); color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">+ New Request</a>
     </div>
 
     <!-- Summary Cards -->
@@ -83,16 +85,14 @@ $query = mysqli_query($koneksi, $sql);
             </div>
         <?php endforeach; ?>
     </div>
-<?php 
-mysqli_data_seek($query, 0);
-echo "TOTAL ROWS: " . mysqli_num_rows($query); 
-?>
+
     <!-- Table -->
     <div class="table-box">
         <table>
             <thead>
                 <tr>
                     <th>Request No</th>
+                    <th>Type</th>
                     <th>Date</th>
                     <th>Total Item</th>
                     <th>Status</th>
@@ -105,15 +105,25 @@ echo "TOTAL ROWS: " . mysqli_num_rows($query);
                     <?php while($row = mysqli_fetch_assoc($query)): ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($row['request_no']) ?></strong></td>
+                            <td><?= htmlspecialchars($row['request_type']) ?></td>
                             <td><?= date('d M Y', strtotime($row['request_date'])) ?></td>
-                            <td style="text-align: center;"><?= $row['total_material'] ?></td>
+                            <td style="text-align: center;">
+                                <?php
+                                // Tampilkan total item sesuai request_type
+                                if($row['request_type'] == 'MATERIAL'){
+                                    echo $row['total_material'] . ' Material';
+                                } else {
+                                    echo $row['total_service'] . ' Service';
+                                }
+                                ?>
+                            </td>
                             <td>
                                 <?php $s = $row['status']; ?>
                                 <span class="badge status-<?= strtolower($s) ?>"><?= htmlspecialchars($s) ?></span>
                             </td>
                             <td><?= htmlspecialchars($row['current_step'] ?? '-') ?></td>
                             <td>
-                                <?php if($row['status'] == "Draft"): ?>
+                                <?php if($row['status'] == "DRAFT"): ?>
                                     <a href="edit_request.php?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
                                 <?php else: ?>
                                     <a href="view_request.php?id=<?= $row['id'] ?>" class="btn-view">View</a>
@@ -123,7 +133,7 @@ echo "TOTAL ROWS: " . mysqli_num_rows($query);
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="6" style="text-align:center; padding: 30px; color: #999;">
+                        <td colspan="7" style="text-align:center; padding: 30px; color: #999;">
                             Belum ada data request untuk akun Anda.
                         </td>
                     </tr>
