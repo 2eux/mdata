@@ -1,8 +1,10 @@
+
 .navbar {
     background: var(--navbar);
     color: white;
     padding: 12px 30px;
     display: flex;
+     min-height: 60px;
     justify-content: space-between;
     align-items: center;
 }
@@ -12,11 +14,6 @@
     font-weight: 600;
 }
 
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
 
 .nav-right a {
     color: white;
@@ -110,20 +107,20 @@
     font-size: 14px;
 }
 
-/* DROPDOWN */
 .user-menu {
     position: relative;
+    display: inline-block;
 }
 
 .user-dropdown {
     display: none;
-    position: fixed; /* Ubah dari absolute ke fixed agar referensinya layar (viewport) */
-    right: 0;        /* Menempel ke ujung kanan layar */
-    top: 57px;       /* Sesuaikan dengan tinggi navbar kamu */
+    position: absolute;
+    top: calc(100% + 15px);
+    left: 0;
     width: 200px;
     background: var(--navbar);
-    border-radius: 0px;
-    box-shadow: -4px 6px 12px rgba(0,0,0,0.4); /* Shadow di kiri dan bawah saja */
+    border-radius: 0;
+    box-shadow: -4px 6px 12px rgba(0,0,0,0.4);
     z-index: 999;
 }
 
@@ -139,3 +136,155 @@
     background: rgba(255,255,255,0.1);
 }
 
+.menu-toggle{
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+}
+
+.sidebar-overlay{
+    display: none;
+}
+
+.sidebar-overlay.show{
+    display: block;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,0.45);
+
+    z-index: 998;
+}
+
+.mobile-user-info,
+.mobile-links,
+.mobile-logout{
+    display: none;
+}
+
+@media (max-width: 768px){
+
+    .menu-toggle{
+        display: block;
+        font-size: 26px;
+        cursor: pointer;
+        color: white;
+    }
+
+    .nav-right{
+
+        position: fixed;
+
+        top: 0;
+        left: -260px;
+
+        width: 240px;
+        height: 100vh;
+
+        background: var(--navbar);
+
+        padding: 20px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 14px;
+
+        transition: left 0.25s ease;
+
+        z-index: 999;
+    }
+
+    .nav-right.show{
+        left: 0;
+    }
+
+    .nav-right a{
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .nav-right a:hover{
+        background: rgba(255,255,255,0.08);
+    }
+
+    /* HIDE DESKTOP USER */
+    .user-menu{
+        display: none;
+    }
+
+    /* MOBILE LINKS */
+    .mobile-links,
+    .mobile-user-info,
+    .mobile-logout{
+        display: flex;
+    }
+
+    .mobile-links{
+        flex-direction: column;
+        width: 100%;
+        gap: 6px;
+    }
+
+    .mobile-links a,
+    .mobile-logout a{
+        padding: 14px 16px;
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: 0.2s ease;
+    }
+
+    .mobile-links a:hover,
+    .mobile-logout a:hover{
+        background: rgba(255,255,255,0.08);
+    }
+
+    /* USER INFO */
+    .mobile-user-info{
+
+        flex-direction: column;
+
+        width: 100%;
+
+        margin-top: 18px;
+        padding-top: 18px;
+
+        border-top: 1px solid rgba(255,255,255,0.12);
+
+        text-decoration: none;
+
+        background: rgba(255,255,255,0.04);
+
+        padding: 14px;
+
+        border-radius: 12px;
+    }
+
+    .mobile-role{
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .mobile-company{
+        color: #8fd3ff;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .mobile-user-info:hover{
+        background: rgba(255,255,255,0.08);
+    }
+
+    .mobile-logout{
+        width: 100%;
+        margin-top: 10px;
+    }
+
+}

@@ -1,0 +1,142 @@
+body{
+    margin:0;
+    padding:0;
+    background:#f0f2f5;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#222;
+    font-size:14px;
+}
+
+.email-wrapper{
+    max-width:680px;
+    margin:30px auto;
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+
+.email-header{
+    color:#fff;
+    padding:20px;
+}
+
+.email-header h2{
+    margin:0;
+    font-size:20px;
+}
+
+.email-subtitle{
+    margin-top:6px;
+    font-size:12px;
+    opacity:.85;
+}
+
+.email-content{
+    padding:20px;
+}
+
+.email-footer{
+    background:#f7f9fc;
+    padding:14px;
+    text-align:center;
+    font-size:11px;
+    color:#999;
+    border-top:1px solid #eee;
+}
+
+.section-title{
+    font-weight:bold;
+    font-size:14px;
+    margin:20px 0 10px;
+    padding-bottom:5px;
+    border-bottom:2px solid #1a3c6b;
+    color:#1a3c6b;
+}
+
+.info-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:15px;
+}
+
+.info-table td{
+    padding:6px 8px;
+    vertical-align:top;
+    font-size:13px;
+}
+
+.info-label{
+    width:150px;
+    font-weight:bold;
+    color:#555;
+}
+
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.email-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+    min-width:700px;
+}
+
+.email-table th{
+    padding:9px 10px;
+    background:#1a3c6b;
+    color:#fff;
+    text-align:left;
+}
+
+.email-table td{
+    padding:8px 10px;
+    border-bottom:1px solid #ddd;
+}
+
+.badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.badge-approved{
+    background:#d4edda;
+    color:#155724;
+}
+
+.badge-rejected{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.badge-pending{
+    background:#cce5ff;
+    color:#004085;
+}
+
+.badge-partial{
+    background:#fff3cd;
+    color:#856404;
+}
+
+@media only screen and (max-width: 768px){
+    .email-wrapper{
+        margin:10px;
+        border-radius:8px;
+    }
+
+    .email-content{
+        padding:15px;
+    }
+
+    .email-table{
+        font-size:11px;
+        min-width:600px;
+    }
+}
