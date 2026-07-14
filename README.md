@@ -1,0 +1,149 @@
+# MDM Portal — Master Data Management
+
+A PHP-based **approval workflow system** for master data management — procurement, material, and service request processing with multi-level review and async email notifications.
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| **Language** | PHP (vanilla, no framework) |
+| **Database** | MySQL (mysqli) |
+| **Queue** | RabbitMQ (`php-amqplib/php-amqplib ^2.8`) |
+| **Email** | PHPMailer (`phpmailer/phpmailer ^7.0`) |
+| **Excel** | PhpSpreadsheet (`phpoffice/phpspreadsheet 1.29`) |
+| **Frontend** | jQuery + CSS |
+
+## System Architecture
+
+```
+┌─────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Web Pages  │────▶│  Form Actions │────▶│   Database   │
+│  (Pages/)   │     │  (action/)   │     │  (MySQL)     │
+└─────────────┘     └──────┬───────┘     └──────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │   Producer   │
+                    │ (producer.php)│
+                    └──────┬───────┘
+                           │ RabbitMQ
+                           ▼
+                    ┌──────────────┐
+                    │   Worker     │
+                    │ (worker.php) │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │   PHPMailer  │
+                    │ (Email Notif)│
+                    └──────────────┘
+```
+
+## Approval Workflow
+
+```
+Requestor → BPO Review → GM Review → MDM BU Review → MDM Global Review → Complete
+```
+
+### Email Notification Types (via RabbitMQ)
+
+| Type | When |
+|------|------|
+| `NEXT_STEP` | Request advances to next approver |
+| `REJECTED` | Request rejected at any stage |
+| `FINAL_EMAIL` | Request fully completed |
+
+## Project Structure
+
+```
+├── Pages/                    # Frontend pages (13 files)
+│   ├── Index.php            # Login page
+│   ├── home.php             # Dashboard
+│   ├── request.php          # Create new request (26KB)
+│   ├── request_list.php     # Request list view
+│   ├── approval_list.php    # Approval queue
+│   ├── view_request.php     # Request detail view
+│   ├── material.php         # Material master data
+│   ├── vendor.php           # Vendor master data
+│   ├── service.php          # Service master data
+│   ├── APBPO.php            # AP BPO list
+│   ├── BPO_Review.php       # BPO approval review
+│   ├── GM_Review.php        # GM approval review
+│   ├── MDM_GLOBAL_REVIEW.php # MDM global review
+│   ├── reviwMDMBU.php       # MDM BU review
+│   ├── detail_material.php  # Material detail
+│   └── profile.php          # User profile
+│
+├── action/                   # Form handlers
+│   ├── save_request.php     # Submit new request
+│   ├── proses_review.php    # Process approval/rejection
+│   ├── proses_create_material.php  # Create material
+│   └── logout.php           # Logout
+│
+├── include/                  # Helper libraries
+│   ├── email_helper.php     # Email notification functions (36KB)
+│   ├── db_helper.php        # Database helpers
+│   ├── queue_helper.php     # RabbitMQ queue helpers
+│   └── navbar.php           # Navigation component
+│
+├── config/
+│   └── koneksi.php          # Database connection config
+│
+├── xml_generate/             # Excel export (material)
+│   ├── generate_xml.php
+│   ├── workbook_start.php   # Spreadsheet builder (25KB)
+│   ├── workbook_end.php
+│   ├── helpers.php
+│   └── sheets/
+│
+├── xml_generate_service/     # Excel export (service)
+│   ├── generate_xml.php
+│   ├── workbook_start.php
+│   ├── workbook_end.php
+│   └── sheets/
+│
+├── css/                      # Stylesheets (10 files)
+├── Gambar/                   # Image assets (logos, banners)
+├── PHPMailer/                # Bundled PHPMailer library
+├── vendor/                   # Composer dependencies
+│
+├── producer.php              # RabbitMQ producer (pushes to email_queue)
+├── worker.php                # RabbitMQ consumer (processes queue)
+├── mdm_portal.sql            # Database schema (191KB)
+├── template.xlsx             # Excel export template
+├── composer.json             # PHP dependencies
+└── composer.lock
+```
+
+## Getting Started
+
+### Prerequisites
+
+- PHP 7.4+
+- MySQL 5.7+
+- RabbitMQ server
+- Composer
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/2eux/mdata.git
+cd mdata
+
+# Install dependencies
+composer install
+
+# Import database
+mysql -u root -p < mdm_portal.sql
+
+# Configure database connection
+# Edit config/koneksi.php with your credentials
+
+# Start RabbitMQ worker (async email processing)
+php worker.php
+
+# Serve the application
+php -S localhost:8080
+```

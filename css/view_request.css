@@ -1,0 +1,207 @@
+h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    color: #000;
+}
+
+.progress-label {
+    font-size: 13px;
+    color: #000000;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* PROGRESS BAR */
+.progress-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+}
+
+.step-circle.done     { background: #2ecc71; }
+.step-circle.pending  { background: #f39c12; }
+.step-circle.rejected { background: #e74c3c; }
+.step-circle.inactive { background: #ccc; }
+
+.step-label {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    max-width: 90px;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #ccc;
+    margin: 0 6px;
+    margin-bottom: 20px;
+}
+
+/* CARD */
+.card-view {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid #d8d8d8;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    position: relative;
+}
+
+
+.card-title-view {
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #111;
+}
+
+
+/* INFO GRID */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 50px;
+    padding-right: 220px; /* kasih ruang utk status box */
+}
+
+
+.info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 16px;
+}
+
+
+/* Label */
+.info-label {
+    min-width: 150px;
+    font-weight: 100;
+    color: #333;
+}
+
+
+/* Value */
+.info-val {
+    font-weight: 100;
+    color: #111;
+}
+
+/* STATUS BOX */
+.status-box {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    text-align: center;
+}
+
+.status-title {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.status-badge {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-approved { background: var(--status-active); color: #1a6b30; }
+.badge-rejected { background: #ffb3b3; color: #8b1a1a; }
+.badge-pending  { background: var(--status-pending); color: #7a6b00; border: 1px solid #e0c94a; }
+.badge-draft    { background: #e0e0e0; color: #555; }
+
+/* TABLE */
+.table-box-view {
+    overflow-x: auto;
+    border: 1px solid #999;
+    background: #fff;
+}
+
+.table-view {
+    width: 100%;
+    border-collapse: collapse;
+
+}
+
+.table-view th {
+    background: var(--table-header);
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+}
+
+.table-view td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.table-view tbody tr:hover {
+    background: #f7fbfb;
+}
+
+/* BACK BUTTON */
+.btn-back {
+    background: var(--btn-primary);
+    color: white;
+    padding: 10px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.step-info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 6px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+        padding-right: 0;
+    }
+
+
+    .status-box {
+        position: static;
+        margin-top: 20px;
+        text-align: left;
+    }
+}

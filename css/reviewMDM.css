@@ -1,0 +1,287 @@
+.wrapper {
+    width: 95%;
+    margin: auto;
+}
+
+/* Box / Card */
+.box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Request Info */
+.info-box {
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 10px;
+    border: 1px solid #dcdcdc;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.info-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 180px auto 180px auto;
+    row-gap: 10px;
+    column-gap: 20px;
+    font-size: 14px;
+}
+
+.label {
+    font-weight: 600;
+    color: #555;
+}
+
+.value {
+    color: #222;
+}
+
+/* Status */
+.status-approved {
+    background: var(--status-active);
+    color: #155724;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-pending {
+    background: var(--status-pending);
+    color: #856404;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-partial {
+    background: #e2e3ff;
+    color: #383d7c;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+/* Table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.table th {
+    background: var(--table-header);
+    color: #333;
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Validation Box */
+.validation-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.validation-box {
+    width: 50%;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Buttons */
+.btn-area {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.btn-approve {
+    background: var(--btn-approve);
+    color: #fff;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.btn-reject {
+    background: var(--btn-reject);
+    color: #fff;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.btn-create {
+        background: var(--logo-material);
+        color: #fff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-create:hover { background: #1558b0; }
+    .btn-create:disabled { opacity: 0.5; cursor: not-allowed; }
+    .alert-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; padding:10px 16px; border-radius:6px; margin-bottom:16px; }
+    .alert-error   { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; padding:10px 16px; border-radius:6px; margin-bottom:16px; }
+    .row-duplicate { background: #fff3cd !important; }
+
+.btn-back {
+    background: var(--btn-primary);
+    color: white;
+    padding: 10px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* ===== MODAL ===== */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal-box {
+        background: #fff;
+        border-radius: 10px;
+        padding: 28px 32px;
+        width: 440px;
+        max-width: 95vw;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        animation: fadeIn .18s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity:0; transform:translateY(-12px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    .modal-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 6px;
+        color: #c0392b;
+    }
+    .modal-subtitle {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 16px;
+    }
+    .modal-textarea {
+        width: 100%;
+        height: 100px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 13px;
+        resize: vertical;
+        box-sizing: border-box;
+        transition: border .2s;
+    }
+    .modal-textarea:focus {
+        outline: none;
+        border-color: #c0392b;
+    }
+    .modal-error {
+        color: #c0392b;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+    }
+    .modal-btn-cancel {
+        padding: 8px 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: #f5f5f5;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .modal-btn-cancel:hover { background: #eee; }
+    .modal-btn-confirm {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 6px;
+        background: #c0392b;
+        color: #fff;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+    }
+    .modal-btn-confirm:hover { background: #a93226; }
+
+/* Duplicate Info */
+.duplicate-ok {
+    background: #d4edda;
+    padding: 12px;
+    border-radius: 6px;
+    color: green;
+    margin-top: 10px;
+}
+
+.duplicate-warning {
+    background: #ffeeba;
+    padding: 12px;
+    border-radius: 6px;
+    color: #856404;
+    margin-top: 10px;
+}
+
+.status-approved::before {
+    content: "✔ ";
+}
+.status-rejected::before {
+    content: "✖ ";
+}
+.status-partial::before {
+    content: "⚠ ";
+}
