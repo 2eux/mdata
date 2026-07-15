@@ -1,7 +1,7 @@
 <?php
 
-$host     = "localhost";
-$username = "root";
+$host     = "kxs31cnzmktkqfav6tshrqqb";
+$username = "mdata";
 $password = "Sv160505";
 $database = "mdm_portal";
 
