@@ -7,19 +7,31 @@ DB_PASS="Sv160505"
 DB_NAME="mdm_portal"
 SQL_FILE="/var/www/html/atri/mdm_portal.sql"
 
-# Check if tables exist
+# Check if data exists (table must have rows)
 php -r "
 \$c = @new mysqli('$DB_HOST', '$DB_USER', '$DB_PASS', '$DB_NAME');
 if (\$c->connect_error) { echo 'DB_UNREACHABLE'; exit(0); }
-\$r = \$c->query('SELECT 1 FROM users LIMIT 1');
-echo \$r ? 'EXISTS' : 'MISSING';
-" 2>/dev/null | grep -q EXISTS
+\$r = \$c->query('SELECT COUNT(*) as cnt FROM users');
+echo (\$r && \$r->fetch_assoc()['cnt'] > 0) ? 'HAS_DATA' : 'EMPTY';
+" 2>/dev/null | grep -q HAS_DATA
 
 if [ $? -ne 0 ]; then
     echo "==> Importing database schema..."
-    # Strip CREATE DATABASE and USE statements - they fail when DB already exists
-    # Also strip comments and set statements
-    grep -v '^CREATE DATABASE\|^USE \|^/\*!\|^-- ' "$SQL_FILE" | grep -v '^$' | sed 's/DEFAULT CHARSET=latin1//' | sed 's/\/\*!40100 DEFAULT CHARACTER SET latin1 \*\/;//' > /tmp/cleaned.sql
+    
+    # Drop existing tables
+    php -r "
+        \$c = new mysqli('$DB_HOST', '$DB_USER', '$DB_PASS', '$DB_NAME');
+        \$tables = \$c->query('SHOW TABLES');
+        if (\$tables) {
+            while (\$row = \$tables->fetch_array()) {
+                \$c->query('DROP TABLE IF EXISTS ' . \$row[0]);
+            }
+            echo 'Dropped existing tables\n';
+        }
+    "
+    
+    # Import SQL
+    sed '/^CREATE DATABASE/d; /^USE /d' "$SQL_FILE" > /tmp/cleaned.sql
     
     php -r "
         \$c = new mysqli('$DB_HOST', '$DB_USER', '$DB_PASS', '$DB_NAME');
