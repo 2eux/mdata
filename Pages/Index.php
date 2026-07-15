@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION['company']    = $data['nama_company'];
         $_SESSION['role']       = $data['nama_role'];
 
-        header("Location: /atri/pages/home.php");
+        header("Location: /atri/Pages/home.php");
         exit();
     } else {
         $message = "Email atau password salah!";
