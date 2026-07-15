@@ -13,6 +13,9 @@ COPY . /var/www/html/atri/
 COPY index.php /var/www/html/index.php
 COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
+# Create lowercase symlink for case-insensitive URL compatibility
+RUN ln -sf /var/www/html/atri/Pages /var/www/html/atri/pages
+
 RUN chown -R www-data:www-data /var/www/html/atri /var/www/html/index.php
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
