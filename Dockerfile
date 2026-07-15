@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /var/www/html
 
 COPY . /var/www/html/atri/
+COPY index.php /var/www/html/index.php
 COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-RUN chown -R www-data:www-data /var/www/html/atri
+RUN chown -R www-data:www-data /var/www/html/atri /var/www/html/index.php
 
 EXPOSE 80
 CMD ["apache2-foreground"]
